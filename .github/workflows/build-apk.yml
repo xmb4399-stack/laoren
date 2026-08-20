@@ -1,15 +1,32 @@
 name: Build Kivy APK
+
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build APK with buildozer
-        uses: masesgroup/buildozer-action@v1
-      - name: Upload APK artifact
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip openjdk-17-jdk libffi-dev libssl-dev autoconf libtool pkg-config zlib1g-dev
+          python -m pip install --upgrade pip buildozer
+
+      - name: Build APK
+        run: |
+          buildozer android debug
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: apk-output
